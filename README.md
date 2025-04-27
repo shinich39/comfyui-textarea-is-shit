@@ -16,5 +16,5 @@ Settings > TextareaIsShit > ...
 | Bracket                 | Write closing bracket with opening bracket. | "\(", "\{", "\[", "\<"     |
 | Global Prompt           | Get Text from Note node.                    | $NOTE_TITLE (e.g. $Note)   |
 | Collapse Prompt         | Remove empty tokens before generation.      |                            |
-| Nested Dynamic Prompt   | Dynamic prompt in Dynamic prompt.           | { { ... | ... } | ... }    |
+| Nested Dynamic Prompt   | Dynamic prompt in Dynamic prompt.           | \{ \{ ... \| ... \} \| ... \}    |
 | Override Dynamic Prompt | Override dynamic prompt to image metadata.  |                            |
