@@ -854,7 +854,7 @@ app.registerExtension({
   settings: [
     {
       id: 'shinich39.TextareaIsShit.Textarea.Debug',
-      category: ['TextareaIsShit', 'HTML gives me a textarea like piece of shit.', 'Debug'],
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'Debug'],
       name: 'Debug',
       tooltip: 'Write prompts in the browser console for debug',
       type: 'boolean',
@@ -865,7 +865,7 @@ app.registerExtension({
     },
     {
       id: 'shinich39.TextareaIsShit.OverrideDynamicPrompt',
-      category: ['TextareaIsShit', 'HTML gives me a textarea like piece of shit.', 'OverrideDynamicPrompt'],
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'OverrideDynamicPrompt'],
       name: 'Override Dynamic Prompt',
       tooltip: 'Override selected token via DynamicPrompt to workflow',
       type: 'boolean',
@@ -876,7 +876,7 @@ app.registerExtension({
     },
     {
       id: 'shinich39.TextareaIsShit.CollapsePrompt',
-      category: ['TextareaIsShit', 'HTML gives me a textarea like piece of shit.', 'CollapsePrompt'],
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'CollapsePrompt'],
       name: 'Collapse Prompt',
       tooltip: 'Remove empty tokens and multiple whitespaces before generation.',
       type: 'boolean',
@@ -887,7 +887,7 @@ app.registerExtension({
     },
     {
       id: 'shinich39.TextareaIsShit.GlobalPrompt',
-      category: ['TextareaIsShit', 'HTML gives me a textarea like piece of shit.', 'GlobalPrompt'],
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'GlobalPrompt'],
       name: 'Global Prompt',
       tooltip: 'Set global prompt to Notes.\nUse to prompt with a title leading "$"\ne.g. $Note',
       type: 'boolean',
@@ -898,7 +898,7 @@ app.registerExtension({
     },
     {
       id: 'shinich39.TextareaIsShit.Bracket',
-      category: ['TextareaIsShit', 'HTML gives me a textarea like piece of shit.', 'Bracket'],
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'Bracket'],
       name: 'Bracket',
       tooltip: 'Insert closing bracket with opening bracket',
       type: 'boolean',
@@ -909,7 +909,7 @@ app.registerExtension({
     },
     {
       id: 'shinich39.TextareaIsShit.Minify',
-      category: ['TextareaIsShit', 'HTML gives me a textarea like piece of shit.', 'Minify'],
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'Minify'],
       name: 'Minify',
       tooltip: 'Ctrl + Shift + B',
       type: 'boolean',
@@ -920,7 +920,7 @@ app.registerExtension({
     },
     {
       id: 'shinich39.TextareaIsShit.Beautify',
-      category: ['TextareaIsShit', 'HTML gives me a textarea like piece of shit.', 'Beautify'],
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'Beautify'],
       name: 'Beautify',
       tooltip: 'Ctrl + B',
       type: 'boolean',
@@ -931,7 +931,7 @@ app.registerExtension({
     },
     {
       id: 'shinich39.TextareaIsShit.Commentify',
-      category: ['TextareaIsShit', 'HTML gives me a textarea like piece of shit.', 'Commentify'],
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'Commentify'],
       name: 'Commentify',
       tooltip: 'Ctrl + \/',
       type: 'boolean',
@@ -942,7 +942,7 @@ app.registerExtension({
     },
     {
       id: 'shinich39.TextareaIsShit.Navigation',
-      category: ['TextareaIsShit', 'HTML gives me a textarea like piece of shit.', 'Navigation'],
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'Navigation'],
       name: 'Navigation',
       tooltip: 'Tab, Shift + Tab',
       type: 'boolean',
@@ -953,7 +953,7 @@ app.registerExtension({
     },
     {
       id: 'shinich39.TextareaIsShit.History',
-      category: ['TextareaIsShit', 'HTML gives me a textarea like piece of shit.', 'History'],
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'History'],
       name: 'History',
       tooltip: 'Ctrl + Z, Ctrl + Shift + Z',
       type: 'boolean',
