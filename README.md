@@ -12,7 +12,7 @@ Settings > TextareaIsShit > ...
 | Navigation              | Select Next/Previous token.                 | Tab, Shift + Tab           |
 | Commentify              | Toggle selected line.                       | Ctrl + /                   |
 | Beautify                | Beautify prompt.                            | Ctrl + B                   |
-| Mimify                  | Minify prompt                               | Ctrl + Shift + B           |
+| Mimify                  | Minify prompt.                              | Ctrl + Shift + B           |
 | Bracket                 | Write closing bracket with opening bracket. | "\(", "\{", "\[", "\<"     |
 | Global Prompt           | Get Text from Note node.                    | $NOTE_TITLE (e.g. $Note)   |
 | Collapse Prompt         | Remove empty tokens before generation.      |                            |

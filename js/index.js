@@ -14,6 +14,7 @@ const Settings = {
   "Beautify": true,
   "Minify": true,
   "Bracket": true,
+  "StartWithNextToken": true,
   "GlobalPrompt": true,
   "CollapsePrompt": true,
   "OverrideDynamicPrompt": true,
@@ -292,7 +293,9 @@ function addHistories(e, ...newHistories) {
     if (!toggle) {
       if (
         !lastHistory ||
-        lastHistory.value !== h.value
+        lastHistory.value !== h.value ||
+        lastHistory.start !== h.start ||
+        lastHistory.end !== h.end
       ) {
         toggle = true;
       }
@@ -675,9 +678,15 @@ function bracketHandler(e) {
   let center = currValue.substring(currStart, currEnd);
   let right = currValue.substring(currEnd);
 
-  newValue = left + opening + center + closing + right;
-  newStart = left.length + opening.length;
-  newEnd = left.length + opening.length + center.length;
+  if (closing === "}" && Settings["StartWithNextToken"] && currStart !== currEnd) {
+    newValue = left + opening + center + "|}" + right;
+    newStart = left.length + opening.length + center.length + 1;
+    newEnd = left.length + opening.length + center.length + 1;
+  } else {
+    newValue = left + opening + center + closing + right;
+    newStart = left.length + opening.length;
+    newEnd = left.length + opening.length + center.length;  
+  }
 
   addHistories(e, {
     value: currValue,
@@ -791,18 +800,18 @@ async function keydownHandler(e) {
   }
 }
 
-function clickHandler(e) {
-  setTimeout(function() {
-    const currValue = e.target.value;
-    const [ currStart, currEnd ] = getCursor(e.target);
+// function clickHandler(e) {
+//   setTimeout(function() {
+//     const currValue = e.target.value;
+//     const [ currStart, currEnd ] = getCursor(e.target);
   
-    addHistories(e, {
-      value: currValue,
-      start: currStart,
-      end: currEnd,
-    });
-  }, 10);
-}
+//     addHistories(e, {
+//       value: currValue,
+//       start: currStart,
+//       end: currEnd,
+//     });
+//   }, 10);
+// }
 
 function changeHandler(e) {
   const currValue = e.target.value;
@@ -897,6 +906,17 @@ app.registerExtension({
       }
     },
     {
+      id: 'shinich39.TextareaIsShit.StartWithNextToken',
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'StartWithNextToken'],
+      name: 'Start with next token',
+      tooltip: 'Start with next token when insert curly bracket.',
+      type: 'boolean',
+      defaultValue: true,
+      onChange: (value) => {
+        Settings["StartWithNextToken"] = value;
+      }
+    },
+    {
       id: 'shinich39.TextareaIsShit.Bracket',
       category: ['TextareaIsShit', '\<textarea\> is garbage', 'Bracket'],
       name: 'Bracket',
@@ -978,7 +998,7 @@ app.registerExtension({
       const elem = r.widget.element;
       elem.addEventListener("keydown", keydownHandler, true);
       elem.addEventListener("input", changeHandler, true);
-      elem.addEventListener("click", clickHandler, true);
+      // elem.addEventListener("click", clickHandler, true);
 
       return r;
     };
