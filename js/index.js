@@ -4,6 +4,8 @@ import { api } from "../../scripts/api.js";
 import { app } from "../../scripts/app.js";
 import { ComfyWidgets } from "../../scripts/widgets.js";
 
+let preventSelectionChange = false;
+
 const histories = new WeakMap(), 
   indexes = new WeakMap();
 
@@ -18,6 +20,7 @@ const Settings = {
   "GlobalPrompt": true,
   "CollapsePrompt": true,
   "OverrideDynamicPrompt": true,
+  "PreventSelectionChange": true,
   "Debug": false,
 }
 
@@ -830,6 +833,23 @@ function changeHandler(e) {
   });
 }
 
+function preventSelectionChangeHandler(e) {
+  if (!Settings["PreventSelectionChange"]) {
+    return;
+  }
+  
+  const [ start, end ] = getCursor(e.target);
+
+  if (preventSelectionChange && start === end && start === e.target.value.length) {
+    if (e.target.prevSelection) {
+      e.target.setSelectionRange(...e.target.prevSelection);
+    }
+    preventSelectionChange = false;
+  } else {
+    e.target.prevSelection = [start, end];
+  }
+}
+
 // Fix selected values via DynamicPrompt
 // Synchronize workflow values with prompt(output) values
 // {red|green|blue} => red
@@ -860,8 +880,18 @@ function changeHandler(e) {
       }
     }
 
+    if (Settings["PreventSelectionChange"]) {
+      preventSelectionChange = true;
+    }
+
     return await origFunc.call(api, ...args);
   }
+
+  api.addEventListener("promptQueued", function(...args) {
+    if (Settings["PreventSelectionChange"]) {
+      preventSelectionChange = false;
+    }
+  });
 })();
 
 app.registerExtension({
@@ -871,7 +901,7 @@ app.registerExtension({
       id: 'shinich39.TextareaIsShit.Textarea.Debug',
       category: ['TextareaIsShit', '\<textarea\> is garbage', 'Debug'],
       name: 'Debug',
-      tooltip: 'Write prompts in the browser console for debug',
+      tooltip: 'Write prompts in the browser console for debug.',
       type: 'boolean',
       defaultValue: false,
       onChange: (value) => {
@@ -882,7 +912,7 @@ app.registerExtension({
       id: 'shinich39.TextareaIsShit.OverrideDynamicPrompt',
       category: ['TextareaIsShit', '\<textarea\> is garbage', 'OverrideDynamicPrompt'],
       name: 'Override Dynamic Prompt',
-      tooltip: 'Override selected token via DynamicPrompt to workflow',
+      tooltip: 'Override selected token via DynamicPrompt to workflow.',
       type: 'boolean',
       defaultValue: true,
       onChange: (value) => {
@@ -912,6 +942,17 @@ app.registerExtension({
       }
     },
     {
+      id: 'shinich39.TextareaIsShit.PreventSelectionChange',
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'PreventSelectionChange'],
+      name: 'Prevent Selection Change',
+      tooltip: 'Prevent selection change when starting generation via Ctrl + Enter.',
+      type: 'boolean',
+      defaultValue: true,
+      onChange: (value) => {
+        Settings["PreventSelectionChange"] = value;
+      }
+    },
+    {
       id: 'shinich39.TextareaIsShit.StartWithNextToken',
       category: ['TextareaIsShit', '\<textarea\> is garbage', 'StartWithNextToken'],
       name: 'Start with next token',
@@ -926,7 +967,7 @@ app.registerExtension({
       id: 'shinich39.TextareaIsShit.Bracket',
       category: ['TextareaIsShit', '\<textarea\> is garbage', 'Bracket'],
       name: 'Bracket',
-      tooltip: 'Insert closing bracket with opening bracket',
+      tooltip: 'Insert closing bracket with opening bracket.',
       type: 'boolean',
       defaultValue: true,
       onChange: (value) => {
@@ -1005,6 +1046,8 @@ app.registerExtension({
       elem.addEventListener("keydown", keydownHandler, true);
       elem.addEventListener("input", changeHandler, true);
       // elem.addEventListener("click", clickHandler, true);
+
+      elem.addEventListener("selectionchange", preventSelectionChangeHandler, true);
 
       return r;
     };
