@@ -604,7 +604,6 @@ function commentifyHandler(e) {
  
   const selectedLineIndexes = [];
 
-
   // bugfix: cursor on last char
   if (currStart === currEnd && currStart === currValue.length) {
     selectedLineIndexes.push(lines.length - 1);
