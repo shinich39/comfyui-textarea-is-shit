@@ -603,19 +603,26 @@ function commentifyHandler(e) {
   }
  
   const selectedLineIndexes = [];
-  let offset = 0;
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const start = offset;
-    const end = offset + line.length - 1;
 
-    offset += line.length;
 
-    if (start > currEnd || end < currStart) {
-      continue;
+  // bugfix: cursor on last char
+  if (currStart === currEnd && currStart === currValue.length) {
+    selectedLineIndexes.push(lines.length - 1);
+  } else {
+    let offset = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const start = offset;
+      const end = offset + line.length - 1;
+  
+      offset += line.length;
+  
+      if (start > currEnd || end < currStart) {
+        continue;
+      }
+  
+      selectedLineIndexes.push(i);
     }
-
-    selectedLineIndexes.push(i);
   }
 
   let isComment = true;
