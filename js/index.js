@@ -715,7 +715,7 @@ function removeBracketHandler(e) {
   if (!Settings.Bracket) {
     return;
   }
-  const { key, shiftKey, ctrlKey } = parseKey(e);
+  // const { key, shiftKey, ctrlKey } = parseKey(e);
   const elem = e.target;
 
   const currValue = elem.value;
@@ -809,20 +809,28 @@ async function keydownHandler(e) {
   }
 }
 
-// function clickHandler(e) {
-//   setTimeout(function() {
-//     const currValue = e.target.value;
-//     const [ currStart, currEnd ] = getCursor(e.target);
-  
-//     addHistories(e, {
-//       value: currValue,
-//       start: currStart,
-//       end: currEnd,
-//     });
-//   }, 10);
-// }
+function clickHandler(e) {
+  if (!Settings.History) {
+    return;
+  }
 
-function changeHandler(e) {
+  setTimeout(function() {
+    const currValue = e.target.value;
+    const [ currStart, currEnd ] = getCursor(e.target);
+
+    const el = e.target;
+  
+    if (!histories.has(el)) {
+      addHistories(e, {
+        value: currValue,
+        start: currStart,
+        end: currEnd,
+      });
+    }
+  }, 10);
+}
+
+function inputHandler(e) {
   const currValue = e.target.value;
   const [ currStart, currEnd ] = getCursor(e.target);
 
@@ -1044,8 +1052,8 @@ app.registerExtension({
     
       const elem = r.widget.element;
       elem.addEventListener("keydown", keydownHandler, true);
-      elem.addEventListener("input", changeHandler, true);
-      // elem.addEventListener("click", clickHandler, true);
+      elem.addEventListener("input", inputHandler, true);
+      elem.addEventListener("click", clickHandler, true);
 
       elem.addEventListener("selectionchange", preventSelectionChangeHandler, true);
 
