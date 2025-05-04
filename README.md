@@ -4,4 +4,4 @@ HTML gives me a textarea like piece of shit.
 
 ## Usage  
 
-Settings > TextareaIsShit > ...
+Settings > TextareaIsShit
