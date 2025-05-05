@@ -848,13 +848,17 @@ function preventSelectionChangeHandler(e) {
   
   const [ start, end ] = getCursor(e.target);
 
-  if (preventSelectionChange && start === end && start === e.target.value.length) {
+  if (!preventSelectionChange) {
+    e.target.prevSelection = [start, end];
+    return;
+  }
+
+  if (start === end && (start === e.target.value.length || start === 0)) {
+
     if (e.target.prevSelection) {
       e.target.setSelectionRange(...e.target.prevSelection);
     }
-    preventSelectionChange = false;
-  } else {
-    e.target.prevSelection = [start, end];
+
   }
 }
 
