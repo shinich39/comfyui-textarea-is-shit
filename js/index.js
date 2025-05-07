@@ -797,8 +797,13 @@ function removeBracketHandler(e) {
 //   setCursor(elem, newStart, newEnd);
 // }
 
-async function keydownHandler(e) {
+function keydownHandler(e) {
   try {
+    if (preventSelectionChange) {
+      e.preventDefault();
+      return;
+    }
+
     // const { key, shiftKey, ctrlKey } = parseKey(e);
     const command = getCommand(e);
     if (command) {
