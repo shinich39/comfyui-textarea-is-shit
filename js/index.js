@@ -289,16 +289,16 @@ function addHistories(e, ...newHistories) {
 
   const nextHistories = currHistories.slice(0, currIndex + 1);
 
-  const lastHistory = nextHistories[nextHistories.length - 1];
+  const currHistory = nextHistories[nextHistories.length - 1];
   
   let toggle = false;
   for (const h of newHistories) {
     if (!toggle) {
       if (
-        !lastHistory ||
-        lastHistory.value !== h.value ||
-        lastHistory.start !== h.start ||
-        lastHistory.end !== h.end
+        !currHistory ||
+        currHistory.value !== h.value ||
+        currHistory.start !== h.start ||
+        currHistory.end !== h.end
       ) {
         toggle = true;
       }
@@ -839,6 +839,10 @@ function inputHandler(e) {
     start: currStart,
     end: currEnd,
   });
+
+  if (preventSelectionChange) {
+    e.target.prevSelection = [currStart, currEnd];
+  }
 }
 
 function preventSelectionChangeHandler(e) {
@@ -1058,7 +1062,6 @@ app.registerExtension({
       elem.addEventListener("keydown", keydownHandler, true);
       elem.addEventListener("input", inputHandler, true);
       elem.addEventListener("click", clickHandler, true);
-
       elem.addEventListener("selectionchange", preventSelectionChangeHandler, true);
 
       return r;
