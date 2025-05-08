@@ -4,7 +4,7 @@ import { api } from "../../scripts/api.js";
 import { app } from "../../scripts/app.js";
 import { ComfyWidgets } from "../../scripts/widgets.js";
 
-let preventSelectionChange = false;
+let preventSelectionChange = 0;
 
 const histories = new WeakMap(), 
   indexes = new WeakMap();
@@ -800,8 +800,13 @@ function removeBracketHandler(e) {
 function keydownHandler(e) {
   try {
     if (preventSelectionChange) {
-      e.preventDefault();
-      return;
+
+      if (Date.now() - preventSelectionChange < 256) {
+        e.preventDefault();
+        return;
+      }
+
+      preventSelectionChange = 0;
     }
 
     // const { key, shiftKey, ctrlKey } = parseKey(e);
@@ -902,7 +907,7 @@ function preventSelectionChangeHandler(e) {
     }
 
     if (Settings["PreventSelectionChange"]) {
-      preventSelectionChange = true;
+      preventSelectionChange = Date.now();
     }
 
     return await origFunc.call(api, ...args);
@@ -910,7 +915,7 @@ function preventSelectionChangeHandler(e) {
 
   api.addEventListener("promptQueued", function(...args) {
     if (Settings["PreventSelectionChange"]) {
-      preventSelectionChange = false;
+      preventSelectionChange = 0;
     }
   });
 })();
