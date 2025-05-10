@@ -629,7 +629,7 @@ function commentifyHandler(e) {
 
   let isComment = true;
   for (const i of selectedLineIndexes) {
-    if (!(/^\/\//.test(lines[i]))) {
+    if (lines[i].trim().length > 0 && !(/^\/\//.test(lines[i]))) {
       isComment = false;
       break;
     }
@@ -637,14 +637,17 @@ function commentifyHandler(e) {
 
   const changes = [];
   for (const i of selectedLineIndexes) {
-    const line = lines[i];
+    const prevLine = lines[i];
+
     if (!isComment) {
-      lines[i] = "// " + line;
+      if (prevLine.trim().length > 0) {
+        lines[i] = "// " + prevLine;
+      }
     } else {
-      lines[i] = line.replace(/^\/\/[^\S\r\n]*/, "");
+      lines[i] = prevLine.replace(/^\/\/[^\S\r\n]*/, "");
     }
 
-    changes.push(lines[i].length - line.length);
+    changes.push(lines[i].length - prevLine.length);
   }
 
   const newValue = lines.join("");
