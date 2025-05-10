@@ -4,7 +4,7 @@ import { api } from "../../scripts/api.js";
 import { app } from "../../scripts/app.js";
 import { ComfyWidgets } from "../../scripts/widgets.js";
 
-let preventSelectionChange = 0;
+let preventSelectionChange = false;
 
 const histories = new WeakMap(), 
   indexes = new WeakMap();
@@ -802,15 +802,10 @@ function removeBracketHandler(e) {
 
 function keydownHandler(e) {
   try {
-    if (preventSelectionChange) {
-
-      if (Date.now() - preventSelectionChange < 256) {
-        e.preventDefault();
-        return;
-      }
-
-      preventSelectionChange = 0;
-    }
+    // if (preventSelectionChange) {
+    //   e.preventDefault();
+    //   return;
+    // }
 
     // const { key, shiftKey, ctrlKey } = parseKey(e);
     const command = getCommand(e);
@@ -852,10 +847,6 @@ function inputHandler(e) {
     start: currStart,
     end: currEnd,
   });
-
-  if (preventSelectionChange) {
-    e.target.prevSelection = [currStart, currEnd];
-  }
 }
 
 function preventSelectionChangeHandler(e) {
@@ -866,16 +857,18 @@ function preventSelectionChangeHandler(e) {
   const [ start, end ] = getCursor(e.target);
 
   if (!preventSelectionChange) {
-    e.target.prevSelection = [start, end];
+    if (start === end && start === e.target.value.length) {
+      e.target.prevSelection = null;
+    } else {
+      e.target.prevSelection = [start, end];
+    }
     return;
   }
 
   if (start === end && (start === e.target.value.length || start === 0)) {
-
     if (e.target.prevSelection) {
       e.target.setSelectionRange(...e.target.prevSelection);
     }
-
   }
 }
 
@@ -910,17 +903,17 @@ function preventSelectionChangeHandler(e) {
     }
 
     if (Settings["PreventSelectionChange"]) {
-      preventSelectionChange = Date.now();
+      preventSelectionChange = true;
     }
 
-    return await origFunc.call(api, ...args);
-  }
+    const r =  await origFunc.call(api, ...args);
 
-  api.addEventListener("promptQueued", function(...args) {
     if (Settings["PreventSelectionChange"]) {
-      preventSelectionChange = 0;
+      preventSelectionChange = false;
     }
-  });
+
+    return r;
+  }
 })();
 
 app.registerExtension({
@@ -1064,9 +1057,11 @@ app.registerExtension({
     const STRING = ComfyWidgets.STRING;
     ComfyWidgets.STRING = function (node, inputName, inputData) {
       const r = STRING.apply(this, arguments);
+
       if (!inputData[1]?.multiline) {
         return r;
       }
+      
       if (!r.widget?.element) {
         return r;
       }
@@ -1077,8 +1072,16 @@ app.registerExtension({
       elem.addEventListener("click", clickHandler, true);
       elem.addEventListener("selectionchange", preventSelectionChangeHandler, true);
 
+      // elem.addEventListener("focus", (e) => {
+      //   console.log("focus");
+      // }, true);
+      // elem.addEventListener("blur", (e) => {
+      //   console.log("blur");
+      // }, true);
+
       return r;
     };
+
 	},
   nodeCreated(node) {
 		if (node.widgets) {
