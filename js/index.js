@@ -12,6 +12,8 @@ const histories = new WeakMap(),
 const Settings = {
   "History": true,
   "Navigation": true,
+  "SelectToken": true,
+  "Indentation": true,
   "Commentify": true,
   "Beautify": true,
   "Minify": true,
@@ -142,6 +144,41 @@ function calcMaxChars(textarea) {
   const contentWidth = textarea.clientWidth - paddingLeft - paddingRight;
 
   return Math.floor(contentWidth / avgCharWidth);
+}
+
+function getRows(str, startIndex, endIndex) {
+
+  const rows = str.split(/\n/);
+
+  for (let i = 0; i < rows.length - 1; i++) {
+    rows[i] += "\n";
+  }
+
+  if (rows.length === 0) {
+    return [];
+  }
+
+  // bugfix: cursor on last char
+  if (startIndex === endIndex && startIndex === str.length) {
+    return rows.map((row, i) => {
+      return { isSelected: i === rows.length - 1, value: row };
+    });
+  }
+
+  let offset = 0;
+  return rows.map((row, i) => {
+    const start = offset;
+    const end = offset + row.length - 1;
+
+    offset += row.length;
+
+    let isSelected = true;
+    if (start > endIndex || end < startIndex) {
+      isSelected = false;
+    }
+
+    return { isSelected, value: row, };
+  });
 }
 
 function getGlobalPrompt() {
@@ -367,19 +404,18 @@ function redoHandler(e) {
   }
 }
 
-function tabHandler(e) {
-  if (!Settings.Navigation) {
+function dblClickHandler(e) {
+  if (!Settings.SelectToken) {
     return;
   }
   e.preventDefault();
   e.stopPropagation();
 
-  const { key, shiftKey, ctrlKey } = parseKey(e);
   const elem = e.target;
 
   const currValue = elem.value;
   const [ currStart, currEnd ] = getCursor(elem);
-  const { value, start, end } = getNextToken(currValue, currStart, currEnd, shiftKey);
+  const { value, start, end } = getNextToken(currValue, currStart, currStart, false);
 
   addHistories(e, {
     value: currValue,
@@ -392,6 +428,74 @@ function tabHandler(e) {
   });
 
   setCursor(elem, start, end);
+}
+
+function tabHandler(e) {
+  if (!Settings.Indentation && !Settings.Navigation) {
+    return;
+  }
+  e.preventDefault();
+  e.stopPropagation();
+
+  const { key, shiftKey, ctrlKey } = parseKey(e);
+  const elem = e.target;
+
+  const currValue = elem.value;
+  const [ currStart, currEnd ] = getCursor(elem);
+  const { value, start, end } = getNextToken(currValue, currStart, currEnd, shiftKey);
+
+  if (Settings.Navigation) {
+    addHistories(e, {
+      value: currValue,
+      start: currStart,
+      end: currEnd,
+    }, {
+      value: elem.value,
+      start: start,
+      end: end,
+    });
+
+    setCursor(elem, start, end);
+  } else if (Settings.Indentation) {
+    const rows = getRows(currValue, currStart, currEnd);
+
+    const changes = [];
+    for (const row of rows) {
+
+      if (!row.isSelected || row.value.trim().length === 0) {
+        continue;
+      }
+      
+      const origLen = row.value.length;
+
+      if (!shiftKey) {
+        row.value = "  " + row.value;
+      } else {
+        row.value = row.value.replace(/^\s\s?/, "");
+      }
+
+      const newLen = row.value.length;
+
+      changes.push(newLen - origLen);
+    }
+
+    const newValue = rows.map((row) => row.value).join("");
+    const newStart = currStart + (changes[0] || 0);
+    const newEnd = currEnd + changes.reduce((acc, cur) => acc + cur, 0);
+
+    addHistories(e, {
+      value: currValue,
+      start: currStart,
+      end: currEnd,
+    }, {
+      value: newValue,
+      start: newStart,
+      end: newEnd,
+    });
+
+    elem.value = newValue;
+    setCursor(elem, newStart, newEnd);
+  }
 }
 
 function beautifyHandler(e) {
@@ -600,58 +704,46 @@ function commentifyHandler(e) {
   const currValue = elem.value;
   const [ currStart, currEnd ] = getCursor(elem);
 
-  const lines = currValue.split(/\n/);
-  for (let i = 0; i < lines.length - 1; i++) {
-    lines[i] += "\n";
-  }
- 
-  const selectedLineIndexes = [];
-
-  // bugfix: cursor on last char
-  if (currStart === currEnd && currStart === currValue.length) {
-    selectedLineIndexes.push(lines.length - 1);
-  } else {
-    let offset = 0;
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const start = offset;
-      const end = offset + line.length - 1;
-  
-      offset += line.length;
-  
-      if (start > currEnd || end < currStart) {
-        continue;
-      }
-  
-      selectedLineIndexes.push(i);
-    }
-  }
+  const rows = getRows(currValue, currStart, currEnd);
 
   let isComment = true;
-  for (const i of selectedLineIndexes) {
-    if (lines[i].trim().length > 0 && !(/^\/\//.test(lines[i]))) {
+  for (const row of rows) {
+
+    if (!row.isSelected || row.value.trim().length === 0) {
+      continue;
+    }
+
+    if (!(/^\/\//.test(row.value))) {
       isComment = false;
       break;
     }
+
   }
 
   const changes = [];
-  for (const i of selectedLineIndexes) {
-    const prevLine = lines[i];
+  for (const row of rows) {
 
-    if (!isComment) {
-      if (prevLine.trim().length > 0) {
-        lines[i] = "// " + prevLine;
-      }
-    } else {
-      lines[i] = prevLine.replace(/^\/\/[^\S\r\n]*/, "");
+    if (!row.isSelected) {
+      continue;
     }
 
-    changes.push(lines[i].length - prevLine.length);
+    const origLen = row.value.length;
+
+    if (!isComment) {
+      if (row.value.trim().length > 0) {
+        row.value = "// " + row.value;
+      }
+    } else {
+      row.value = row.value.replace(/^\/\/[^\S\r\n]*/, "");
+    }
+
+    const newLen = row.value.length;
+
+    changes.push(newLen - origLen);
   }
 
-  const newValue = lines.join("");
-  const newStart = currStart + changes[0];
+  const newValue = rows.map((row) => row.value).join("");
+  const newStart = currStart + (changes[0] || 0);
   const newEnd = currEnd + changes.reduce((acc, cur) => acc + cur, 0);
 
   addHistories(e, {
@@ -1041,6 +1133,28 @@ app.registerExtension({
       }
     },
     {
+      id: 'shinich39.TextareaIsShit.Indentation',
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'Indentation'],
+      name: 'Indentation',
+      tooltip: 'Tab, Shift + Tab',
+      type: 'boolean',
+      defaultValue: true,
+      onChange: (value) => {
+        Settings["Indentation"] = value;
+      }
+    },
+    {
+      id: 'shinich39.TextareaIsShit.SelectToken',
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'SelectToken'],
+      name: 'Select Token',
+      tooltip: 'Double click',
+      type: 'boolean',
+      defaultValue: true,
+      onChange: (value) => {
+        Settings["SelectToken"] = value;
+      }
+    },
+    {
       id: 'shinich39.TextareaIsShit.History',
       category: ['TextareaIsShit', '\<textarea\> is garbage', 'History'],
       name: 'History',
@@ -1053,7 +1167,6 @@ app.registerExtension({
     },
   ],
 	init() {
-
     const STRING = ComfyWidgets.STRING;
     ComfyWidgets.STRING = function (node, inputName, inputData) {
       const r = STRING.apply(this, arguments);
@@ -1070,18 +1183,11 @@ app.registerExtension({
       elem.addEventListener("keydown", keydownHandler, true);
       elem.addEventListener("input", inputHandler, true);
       elem.addEventListener("click", clickHandler, true);
+      elem.addEventListener("dblclick", dblClickHandler, true);
       elem.addEventListener("selectionchange", preventSelectionChangeHandler, true);
-
-      // elem.addEventListener("focus", (e) => {
-      //   console.log("focus");
-      // }, true);
-      // elem.addEventListener("blur", (e) => {
-      //   console.log("blur");
-      // }, true);
 
       return r;
     };
-
 	},
   nodeCreated(node) {
 		if (node.widgets) {
