@@ -709,11 +709,17 @@ function commentifyHandler(e) {
   let isComment = true;
   for (const row of rows) {
 
-    if (!row.isSelected || row.value.trim().length === 0) {
+    if (!row.isSelected) {
       continue;
     }
 
-    if (!(/^\/\//.test(row.value))) {
+    const v = row.value.trim();
+
+    if (v.length === 0) {
+      continue;
+    }
+
+    if (!(/^\/\//.test(v))) {
       isComment = false;
       break;
     }
@@ -731,10 +737,10 @@ function commentifyHandler(e) {
 
     if (!isComment) {
       if (row.value.trim().length > 0) {
-        row.value = "// " + row.value;
+        row.value = row.value.replace(/^([^\S\r\n]*)/, `$1// `);
       }
     } else {
-      row.value = row.value.replace(/^\/\/[^\S\r\n]*/, "");
+      row.value = row.value.replace(/\/\/[^\S\r\n]?/, "");
     }
 
     const newLen = row.value.length;

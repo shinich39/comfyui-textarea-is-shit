@@ -4,7 +4,8 @@
   "description": "HTML gives me a textarea like piece of shit.",
   "type": "module",
   "scripts": {
-    "pub": "node scripts/pub.js"
+    "commit": "node scripts/commit.js",
+    "pub": "node scripts/publish.js"
   },
   "repository": {
     "type": "git",
