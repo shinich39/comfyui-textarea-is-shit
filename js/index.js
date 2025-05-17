@@ -20,6 +20,7 @@ const Settings = {
   "Bracket": true,
   "StartWithNextToken": true,
   "GlobalPrompt": true,
+  "MethodPrompt": true,
   "CollapsePrompt": true,
   "OverrideDynamicPrompt": true,
   "PreventSelectionChange": true,
@@ -267,6 +268,41 @@ function parseGlobalPrompt(prompt) {
     prompt = prompt.replaceAll(`$${key}`, () => parseGlobalPrompt(
       "{" + (values[Math.floor(Math.random() * values.length)] || "") + "}"
     ));
+  }
+
+  return prompt;
+}
+
+function parseMethodPrompt(prompt) {
+  const re = /(replace|replaceAll)\\?\(\s*['"](.+)['"]\s*\\?,\s*['"](.*)['"]\s*\\?\)/g;
+
+  const methods = [];
+  let match;
+
+  while((match = re.exec(prompt))) {
+    const startIndex = match.index;
+    const endIndex = match.index + match[0].length;
+
+    methods.push({
+      startIndex,
+      endIndex,
+      name: match[1],
+      args: [match[2], match[3]],
+    });
+  }
+
+  // remove methods
+  for (const { startIndex, endIndex } of methods.reverse()) {
+    prompt = prompt.substring(0, startIndex) + prompt.substring(endIndex);
+  }
+
+  // run methods
+  for (const { name, args } of methods) {
+    if (name === "replace") {
+      prompt = prompt.replace(new RegExp(args[0]), args[1]);
+    } else if (name === "replaceAll") {
+      prompt = prompt.replace(new RegExp(args[0], "g"), args[1]);
+    }
   }
 
   return prompt;
@@ -1061,6 +1097,17 @@ app.registerExtension({
         Settings["GlobalPrompt"] = value;
       }
     },
+        {
+      id: 'shinich39.TextareaIsShit.MethodPrompt',
+      category: ['TextareaIsShit', '\<textarea\> is garbage', 'MethodPrompt'],
+      name: 'Method Prompt',
+      tooltip: 'replace("regex","replacement")\nreplaceAll\\("regex"\\,"replacement"\\)',
+      type: 'boolean',
+      defaultValue: true,
+      onChange: (value) => {
+        Settings["MethodPrompt"] = value;
+      }
+    },
     {
       id: 'shinich39.TextareaIsShit.PreventSelectionChange',
       category: ['TextareaIsShit', '\<textarea\> is garbage', 'PreventSelectionChange'],
@@ -1208,13 +1255,21 @@ app.registerExtension({
         widget.serializeValue = async function(workflowNode, widgetIndex) {
           let r = await origSerializeValue?.apply(this, arguments) ?? widget.value;
 
-          // Bugfix: Custom-Script presetText.js has overwrite original dynamicPrompt
+          // Convert $name to Note.text
           if (Settings["GlobalPrompt"]) {
             r = parseGlobalPrompt(r);
           }
+
+          // Bugfix: Custom-Script presetText.js has overwrite original dynamicPrompt
           r = stripComments(r);
           r = parseDynamicPrompt(`{${r}}`);
 
+          // Remove "method(a, b)" in prompt and run methods 
+          if (Settings["MethodPrompt"]) {
+            r = parseMethodPrompt(r);
+          }
+
+          // Remove unused blanks, commas
           if (Settings["CollapsePrompt"]) {
             r = r.replace(/\s+/g, " ").replace(/\s*,\s*/g, ",").replace(/,+/g, ",").replace(/,/g, ", ");
           }
