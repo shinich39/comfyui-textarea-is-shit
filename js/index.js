@@ -178,7 +178,14 @@ function getRows(str, startIndex, endIndex) {
       isSelected = false;
     }
 
-    return { isSelected, value: row, };
+    const trimmedValue = row.trim();
+
+    return {
+      isSelected, 
+      isEmpty: trimmedValue.length === 0, 
+      value: row, 
+      trimmedValue,
+    };
   });
 }
 
@@ -498,7 +505,7 @@ function tabHandler(e) {
     const changes = [];
     for (const row of rows) {
 
-      if (!row.isSelected || row.value.trim().length === 0) {
+      if (!row.isSelected || row.isEmpty) {
         continue;
       }
       
@@ -741,28 +748,29 @@ function commentifyHandler(e) {
   const [ currStart, currEnd ] = getCursor(elem);
 
   const rows = getRows(currValue, currStart, currEnd);
+  const rowIntents = [];
 
-  let isComment = true;
+  let isCommented = true;
+  
   for (const row of rows) {
 
-    if (!row.isSelected) {
+    if (!row.isSelected || row.isEmpty) {
       continue;
     }
 
-    const v = row.value.trim();
+    rowIntents.push(row.value.match(/^[^\S\r\n]*/)?.[0].length || 0);
 
-    if (v.length === 0) {
-      continue;
+    if (isCommented && !(/^\/\//.test(row.trimmedValue))) {
+      isCommented = false;
     }
-
-    if (!(/^\/\//.test(v))) {
-      isComment = false;
-      break;
-    }
-
   }
 
+  const minIntent = !isCommented 
+    ? rowIntents.reduce((acc, cur) => Math.min(acc, cur), rowIntents.length > 0 ? Number.MAX_SAFE_INTEGER : 0)
+    : 0;
+
   const changes = [];
+
   for (const row of rows) {
 
     if (!row.isSelected) {
@@ -771,9 +779,9 @@ function commentifyHandler(e) {
 
     const origLen = row.value.length;
 
-    if (!isComment) {
-      if (row.value.trim().length > 0) {
-        row.value = row.value.replace(/^([^\S\r\n]*)/, `$1// `);
+    if (!isCommented) {
+      if (!row.isEmpty) {
+        row.value = row.value.substring(0, minIntent) + "// " + row.value.substring(minIntent);
       }
     } else {
       row.value = row.value.replace(/\/\/[^\S\r\n]?/, "");
