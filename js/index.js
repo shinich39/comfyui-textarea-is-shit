@@ -594,7 +594,7 @@ function beautifyHandler(e) {
       target.push("|");
     } else if (v === ",") {
       // pass
-    } else {
+    } else if (!v.startsWith("//")) {
       if (target.length === 0) {
         target.push(setWeights(v, w));
       } else if (Array.isArray(target[target.length - 1])) {
@@ -602,6 +602,8 @@ function beautifyHandler(e) {
       } else if (typeof target[target.length - 1] === "string"){
         target.push(setWeights(v, w))
       }
+    } else {
+      target.push(v);
     }
   }
 
