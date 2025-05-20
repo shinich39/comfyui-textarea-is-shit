@@ -1,6 +1,6 @@
 {
   "name": "comfyui-textarea-is-shit",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "HTML gives me a textarea like piece of shit.",
   "type": "module",
   "scripts": {
