@@ -560,7 +560,7 @@ function beautifyHandler(e) {
   // const height = elem.offsetHeight;
   const max = calcMaxChars(elem) - 1;
 
-  const values = currValue.split(/((?<!\\)[,{}()[\]|])/)
+  const values = currValue.split(/(\/\/.*|(?<!\\)[,{}()[\]|])/)
     .map((item) => item.trim())
     .filter(Boolean);
 
@@ -687,7 +687,7 @@ function beautifyHandler(e) {
         acc += item;
         len += item.length;
 
-        if (item !== "|") {
+        if (item !== "|" && !item.startsWith("//")) {
           acc += ",";
           len += 1;
         }
