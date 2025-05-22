@@ -272,12 +272,11 @@ function parseDynamicPrompt(prompt) {
   return prompt;
 }
 
-function parseGlobalPrompt(prompt) {
-  const GlobalPrompt = getGlobalPrompt();
-
-  for (const [key, values] of Object.entries(GlobalPrompt).sort((a, b) => b[0].length - a[0].length)) {
+function parseGlobalPrompt(globalPrompts, prompt) {
+  for (const [key, values] of Object.entries(globalPrompts).sort((a, b) => b[0].length - a[0].length)) {
     prompt = prompt.replaceAll(`$${key}`, () => parseGlobalPrompt(
-      "{" + (values[Math.floor(Math.random() * values.length)] || "") + "\n}"
+      globalPrompts,
+      "{" + stripComments(values[Math.floor(Math.random() * values.length)] || "") + "}"
     ));
   }
 
@@ -1269,12 +1268,15 @@ app.registerExtension({
         widget.serializeValue = async function(workflowNode, widgetIndex) {
           let r = await origSerializeValue?.apply(this, arguments) ?? widget.value;
 
+          // Bugfix: Custom-Script presetText.js has overwrite original dynamicPrompt
+          r = stripComments(r);
+
           // Convert $name to Note.text
           if (Settings["GlobalPrompt"]) {
-            r = parseGlobalPrompt(r);
+            const gp = getGlobalPrompt();
+            r = parseGlobalPrompt(gp, r);
           }
 
-          // Bugfix: Custom-Script presetText.js has overwrite original dynamicPrompt
           r = stripComments(r);
 
           try {
