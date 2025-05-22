@@ -1280,7 +1280,7 @@ app.registerExtension({
           r = stripComments(r);
 
           try {
-            r = parseDynamicPrompt(`{${r}\n}`);
+            r = parseDynamicPrompt(`{${r}}`);
           } catch(err) {
             console.error(`[comfyui-textarea-is-shit][#${node.id}] ${err.message}\n${r}`);
           }
