@@ -162,7 +162,16 @@ function getRows(str, startIndex, endIndex) {
   // bugfix: cursor on last char
   if (startIndex === endIndex && startIndex === str.length) {
     return rows.map((row, i) => {
-      return { isSelected: i === rows.length - 1, value: row };
+
+      const trimmedValue = row.trim();
+
+      return {
+        isSelected: i === rows.length - 1,
+        isEmpty: trimmedValue.length === 0, 
+        value: row,
+        trimmedValue,
+      };
+
     });
   }
 
@@ -240,12 +249,7 @@ function parseDynamicPrompt(prompt) {
 
       const closingIndex = prompt.indexOf("}", offset);
       if (closingIndex === -1) {
-
-        if (Settings["Debug"]) {
-          console.log(`[comfyui-textarea-is-shit][#${node.id}][${i}]`, `Unexpected token "{"\n${prompt}`);
-        }
-
-        break;
+        throw new Error(`Unexpected token "{"`);
       }
   
       const nextOpeningIndex = prompt.indexOf("{", offset);
@@ -273,7 +277,7 @@ function parseGlobalPrompt(prompt) {
 
   for (const [key, values] of Object.entries(GlobalPrompt).sort((a, b) => b[0].length - a[0].length)) {
     prompt = prompt.replaceAll(`$${key}`, () => parseGlobalPrompt(
-      "{" + (values[Math.floor(Math.random() * values.length)] || "") + "}"
+      "{" + (values[Math.floor(Math.random() * values.length)] || "") + "\n}"
     ));
   }
 
@@ -715,7 +719,7 @@ function beautifyHandler(e) {
   const acc = writeStr(parts, 0, 0).trim();
   
   if (Settings["Debug"]) {
-    console.log(`[comfyui-textarea-is-shit]\n`, acc);
+    console.log(`[comfyui-textarea-is-shit]\n${acc}`);
   }
 
   let newValue = acc;
@@ -1272,7 +1276,12 @@ app.registerExtension({
 
           // Bugfix: Custom-Script presetText.js has overwrite original dynamicPrompt
           r = stripComments(r);
-          r = parseDynamicPrompt(`{${r}}`);
+
+          try {
+            r = parseDynamicPrompt(`{${r}\n}`);
+          } catch(err) {
+            console.error(`[comfyui-textarea-is-shit][#${node.id}] ${err.message}\n${r}`);
+          }
 
           // Remove "method(a, b)" in prompt and run methods 
           if (Settings["MethodPrompt"]) {
@@ -1290,7 +1299,7 @@ app.registerExtension({
           }
 
           if (Settings["Debug"]) {
-            console.log(`[comfyui-textarea-is-shit][#${node.id}]\n`, r);
+            console.log(`[comfyui-textarea-is-shit][#${node.id}]\n${r}`);
           }
 
           return r;
