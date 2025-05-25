@@ -949,10 +949,10 @@ function removeBracketHandler(e) {
 
 function keydownHandler(e) {
   try {
-    // if (preventSelectionChange) {
-    //   e.preventDefault();
-    //   return;
-    // }
+    if (preventSelectionChange) {
+      e.preventDefault();
+      return;
+    }
 
     // const { key, shiftKey, ctrlKey } = parseKey(e);
     const command = getCommand(e);
@@ -986,6 +986,11 @@ function clickHandler(e) {
 }
 
 function inputHandler(e) {
+  if (preventSelectionChange) {
+    e.preventDefault();
+    return;
+  }
+
   const currValue = e.target.value;
   const [ currStart, currEnd ] = getCursor(e.target);
 
