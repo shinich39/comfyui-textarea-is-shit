@@ -12,7 +12,7 @@ const histories = new WeakMap(),
 const Settings = {
   "History": true,
   "Navigation": true,
-  "SelectToken": true,
+  // "SelectToken": true,
   "Indentation": true,
   "Commentify": true,
   "Beautify": true,
@@ -20,7 +20,7 @@ const Settings = {
   "Bracket": true,
   "StartWithNextToken": true,
   "GlobalPrompt": true,
-  "MethodPrompt": true,
+  // "MethodPrompt": true,
   "CollapsePrompt": true,
   "OverrideDynamicPrompt": true,
   "PreventSelectionChange": true,
@@ -283,40 +283,40 @@ function parseGlobalPrompt(globalPrompts, prompt) {
   return prompt;
 }
 
-function parseMethodPrompt(prompt) {
-  const re = /(replace|replaceAll)\\?\(\s*['"](.+)['"]\s*\\?,\s*['"](.*)['"]\s*\\?\)/g;
+// function parseMethodPrompt(prompt) {
+//   const re = /(replace|replaceAll)\\?\(\s*['"](.+)['"]\s*\\?,\s*['"](.*)['"]\s*\\?\)/g;
 
-  const methods = [];
-  let match;
+//   const methods = [];
+//   let match;
 
-  while((match = re.exec(prompt))) {
-    const startIndex = match.index;
-    const endIndex = match.index + match[0].length;
+//   while((match = re.exec(prompt))) {
+//     const startIndex = match.index;
+//     const endIndex = match.index + match[0].length;
 
-    methods.push({
-      startIndex,
-      endIndex,
-      name: match[1],
-      args: [match[2], match[3]],
-    });
-  }
+//     methods.push({
+//       startIndex,
+//       endIndex,
+//       name: match[1],
+//       args: [match[2], match[3]],
+//     });
+//   }
 
-  // remove methods
-  for (const { startIndex, endIndex } of methods.reverse()) {
-    prompt = prompt.substring(0, startIndex) + prompt.substring(endIndex);
-  }
+//   // remove methods
+//   for (const { startIndex, endIndex } of methods.reverse()) {
+//     prompt = prompt.substring(0, startIndex) + prompt.substring(endIndex);
+//   }
 
-  // run methods
-  for (const { name, args } of methods) {
-    if (name === "replace") {
-      prompt = prompt.replace(new RegExp(args[0]), args[1]);
-    } else if (name === "replaceAll") {
-      prompt = prompt.replace(new RegExp(args[0], "g"), args[1]);
-    }
-  }
+//   // run methods
+//   for (const { name, args } of methods) {
+//     if (name === "replace") {
+//       prompt = prompt.replace(new RegExp(args[0]), args[1]);
+//     } else if (name === "replaceAll") {
+//       prompt = prompt.replace(new RegExp(args[0], "g"), args[1]);
+//     }
+//   }
 
-  return prompt;
-}
+//   return prompt;
+// }
 
 function getNextToken(str, currStart, currEnd, reverse) {
   const tokens = parseString(str);
@@ -450,31 +450,31 @@ function redoHandler(e) {
   }
 }
 
-function dblClickHandler(e) {
-  if (!Settings.SelectToken) {
-    return;
-  }
-  e.preventDefault();
-  e.stopPropagation();
+// function dblClickHandler(e) {
+//   if (!Settings.SelectToken) {
+//     return;
+//   }
+//   e.preventDefault();
+//   e.stopPropagation();
 
-  const elem = e.target;
+//   const elem = e.target;
 
-  const currValue = elem.value;
-  const [ currStart, currEnd ] = getCursor(elem);
-  const { value, start, end } = getNextToken(currValue, currStart, currStart, false);
+//   const currValue = elem.value;
+//   const [ currStart, currEnd ] = getCursor(elem);
+//   const { value, start, end } = getNextToken(currValue, currStart, currStart, false);
 
-  addHistories(e, {
-    value: currValue,
-    start: currStart,
-    end: currEnd,
-  }, {
-    value: elem.value,
-    start: start,
-    end: end,
-  });
+//   addHistories(e, {
+//     value: currValue,
+//     start: currStart,
+//     end: currEnd,
+//   }, {
+//     value: elem.value,
+//     start: start,
+//     end: end,
+//   });
 
-  setCursor(elem, start, end);
-}
+//   setCursor(elem, start, end);
+// }
 
 function tabHandler(e) {
   if (!Settings.Indentation && !Settings.Navigation) {
@@ -1115,17 +1115,17 @@ app.registerExtension({
         Settings["GlobalPrompt"] = value;
       }
     },
-        {
-      id: 'shinich39.TextareaIsShit.MethodPrompt',
-      category: ['TextareaIsShit', '\<textarea\> is garbage', 'MethodPrompt'],
-      name: 'Method Prompt',
-      tooltip: 'replace("regex","replacement")\nreplaceAll\\("regex"\\,"replacement"\\)',
-      type: 'boolean',
-      defaultValue: true,
-      onChange: (value) => {
-        Settings["MethodPrompt"] = value;
-      }
-    },
+    // {
+    //   id: 'shinich39.TextareaIsShit.MethodPrompt',
+    //   category: ['TextareaIsShit', '\<textarea\> is garbage', 'MethodPrompt'],
+    //   name: 'Method Prompt',
+    //   tooltip: 'replace("regex","replacement")\nreplaceAll\\("regex"\\,"replacement"\\)',
+    //   type: 'boolean',
+    //   defaultValue: true,
+    //   onChange: (value) => {
+    //     Settings["MethodPrompt"] = value;
+    //   }
+    // },
     {
       id: 'shinich39.TextareaIsShit.PreventSelectionChange',
       category: ['TextareaIsShit', '\<textarea\> is garbage', 'PreventSelectionChange'],
@@ -1214,17 +1214,17 @@ app.registerExtension({
         Settings["Indentation"] = value;
       }
     },
-    {
-      id: 'shinich39.TextareaIsShit.SelectToken',
-      category: ['TextareaIsShit', '\<textarea\> is garbage', 'SelectToken'],
-      name: 'Select Token',
-      tooltip: 'Double click',
-      type: 'boolean',
-      defaultValue: true,
-      onChange: (value) => {
-        Settings["SelectToken"] = value;
-      }
-    },
+    // {
+    //   id: 'shinich39.TextareaIsShit.SelectToken',
+    //   category: ['TextareaIsShit', '\<textarea\> is garbage', 'SelectToken'],
+    //   name: 'Select Token',
+    //   tooltip: 'Double click',
+    //   type: 'boolean',
+    //   defaultValue: true,
+    //   onChange: (value) => {
+    //     Settings["SelectToken"] = value;
+    //   }
+    // },
     {
       id: 'shinich39.TextareaIsShit.History',
       category: ['TextareaIsShit', '\<textarea\> is garbage', 'History'],
@@ -1254,7 +1254,7 @@ app.registerExtension({
       elem.addEventListener("keydown", keydownHandler, true);
       elem.addEventListener("input", inputHandler, true);
       elem.addEventListener("click", clickHandler, true);
-      elem.addEventListener("dblclick", dblClickHandler, true);
+      // elem.addEventListener("dblclick", dblClickHandler, true);
       elem.addEventListener("selectionchange", preventSelectionChangeHandler, true);
 
       return r;
@@ -1291,9 +1291,9 @@ app.registerExtension({
           }
 
           // Remove "method(a, b)" in prompt and run methods 
-          if (Settings["MethodPrompt"]) {
-            r = parseMethodPrompt(r);
-          }
+          // if (Settings["MethodPrompt"]) {
+          //   r = parseMethodPrompt(r);
+          // }
 
           // Remove unused blanks, commas
           if (Settings["CollapsePrompt"]) {
