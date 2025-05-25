@@ -2,7 +2,7 @@
 @author: shinich39
 @title: comfyui-textarea-is-shit
 @nickname: comfyui-textarea-is-shit
-@version: 1.0.8
+@version: 1.0.9
 @description: HTML gives me a textarea like piece of shit.
 """
 
