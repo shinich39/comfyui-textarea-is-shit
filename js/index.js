@@ -1297,7 +1297,7 @@ app.registerExtension({
 
           // Remove unused blanks, commas
           if (Settings["CollapsePrompt"]) {
-            r = r.replace(/\s+/g, " ").replace(/\s*,\s*/g, ",").replace(/,+/g, ",").replace(/,/g, ", ");
+            r = r.replace(/[\r\n]/g, ",").replace(/[,\s]*,+[,\s]*/g, ", ");
           }
 
           // Overwrite the value in the serialized workflow pnginfo
