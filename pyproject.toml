@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-textarea-is-shit"
 description = "HTML gives me a textarea like piece of shit."
-version = "1.0.11"
+version = "1.0.12"
 license = { file = "LICENSE" }
 
 [project.urls]

@@ -40,7 +40,7 @@ const Commands = {
   "shift+<": bracketHandler, // <
   "[": bracketHandler, // [
   "backspace": removeBracketHandler,
-  "enter": IndentationHandler,
+  // "enter": IndentationHandler,
   // "\'": bracketHandler,
   // "\`": bracketHandler,
   // "shift+\"": bracketHandler,
@@ -913,53 +913,53 @@ function removeBracketHandler(e) {
 }
 
 // conflict with pysssss-autocomplete
-function IndentationHandler(e) {
-  if (!Settings.Indentation) {
-    return;
-  }
+// function IndentationHandler(e) {
+//   if (!Settings.Indentation) {
+//     return;
+//   }
   
-  const { key, shiftKey, ctrlKey } = parseKey(e);
-  if (shiftKey || ctrlKey) {
-    return;
-  }
+//   const { key, shiftKey, ctrlKey } = parseKey(e);
+//   if (shiftKey || ctrlKey) {
+//     return;
+//   }
 
-  e.preventDefault();
-  e.stopPropagation();
+//   e.preventDefault();
+//   e.stopPropagation();
 
-  const elem = e.target;
-  const currValue = elem.value;
-  const [ currStart, currEnd ] = getCursor(elem);
-  const level = getDepth(currValue.substring(0, currStart));
+//   const elem = e.target;
+//   const currValue = elem.value;
+//   const [ currStart, currEnd ] = getCursor(elem);
+//   const level = getDepth(currValue.substring(0, currStart));
 
-  let newValue = currValue;
-  let newStart = currStart;
-  let newEnd = currEnd;
+//   let newValue = currValue;
+//   let newStart = currStart;
+//   let newEnd = currEnd;
 
-  let left = currValue.substring(0, currStart);
-  let center = "\n" + Array(level * 2).fill(" ").join("");
-  let right = currValue.substring(currEnd);
+//   let left = currValue.substring(0, currStart);
+//   let center = "\n" + Array(level * 2).fill(" ").join("");
+//   let right = currValue.substring(currEnd);
 
-  if (right.charAt(0) === "}") {
-    right = "\n" + Array((level - 1) * 2).fill(" ").join("") + right;
-  }
+//   if (right.charAt(0) === "}") {
+//     right = "\n" + Array((level - 1) * 2).fill(" ").join("") + right;
+//   }
 
-  newValue = left + center + right;
-  newStart = left.length + center.length;
-  newEnd = left.length + center.length;
+//   newValue = left + center + right;
+//   newStart = left.length + center.length;
+//   newEnd = left.length + center.length;
 
-  addHistories(e, {
-    value: currValue,
-    start: currStart,
-    end: currEnd,
-  }, {
-    value: newValue,
-    start: newStart,
-    end: newEnd,
-  });
+//   addHistories(e, {
+//     value: currValue,
+//     start: currStart,
+//     end: currEnd,
+//   }, {
+//     value: newValue,
+//     start: newStart,
+//     end: newEnd,
+//   });
   
-  elem.value = newValue;
-  setCursor(elem, newStart, newEnd);
-}
+//   elem.value = newValue;
+//   setCursor(elem, newStart, newEnd);
+// }
 
 function keydownHandler(e) {
   try {
