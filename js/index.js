@@ -151,51 +151,81 @@ function getRows(str, startIndex, endIndex) {
 
   const rows = str.split(/\n/);
 
+  let selectedCount = 0, emtpyCount = 0;
   for (let i = 0; i < rows.length - 1; i++) {
     rows[i] += "\n";
   }
 
   if (rows.length === 0) {
-    return [];
+    return {rows, selectedCount, emtpyCount};
   }
 
   // bugfix: cursor on last char
   if (startIndex === endIndex && startIndex === str.length) {
-    return rows.map((row, i) => {
+    return {
+      rows: rows.map((row, i) => {
 
-      const trimmedValue = row.trim();
+        const trimmedValue = row.trim();
 
-      return {
-        isSelected: i === rows.length - 1,
-        isEmpty: trimmedValue.length === 0, 
-        value: row,
-        trimmedValue,
-      };
+        const isSelected = i === rows.length - 1;
+        const isEmpty = trimmedValue.length === 0;
 
-    });
+        if (isSelected) {
+          selectedCount++;
+        }
+        
+        if (isEmpty) {
+          emtpyCount++;
+        }
+
+        return {
+          isSelected,
+          isEmpty,
+          value: row,
+          trimmedValue,
+        };
+
+      }),
+      selectedCount,
+      emtpyCount,
+    };
   }
 
   let offset = 0;
-  return rows.map((row, i) => {
-    const start = offset;
-    const end = offset + row.length - 1;
+  return {
+    rows: rows.map((row, i) => {
+      const start = offset;
+      const end = offset + row.length - 1;
 
-    offset += row.length;
+      offset += row.length;
 
-    let isSelected = true;
-    if (start > endIndex || end < startIndex) {
-      isSelected = false;
-    }
+      let isSelected = true;
+      if (start > endIndex || end < startIndex) {
+        isSelected = false;
+      }
 
-    const trimmedValue = row.trim();
+      const trimmedValue = row.trim();
 
-    return {
-      isSelected, 
-      isEmpty: trimmedValue.length === 0, 
-      value: row, 
-      trimmedValue,
-    };
-  });
+      const isEmpty = trimmedValue.length === 0;
+
+      if (isSelected) {
+        selectedCount++;
+      }
+      
+      if (isEmpty) {
+        emtpyCount++;
+      }
+
+      return {
+        isSelected, 
+        isEmpty, 
+        value: row, 
+        trimmedValue,
+      };
+    }),
+    selectedCount,
+    emtpyCount,
+  }
 }
 
 function getGlobalPrompt() {
@@ -503,12 +533,12 @@ function tabHandler(e) {
 
     setCursor(elem, start, end);
   } else if (Settings.Indentation) {
-    const rows = getRows(currValue, currStart, currEnd);
+    const { rows, selectedCount, emtpyCount } = getRows(currValue, currStart, currEnd);
 
     const changes = [];
     for (const row of rows) {
 
-      if (!row.isSelected || row.isEmpty) {
+      if (!row.isSelected || (selectedCount !== 1 && row.isEmpty)) {
         continue;
       }
       
@@ -752,7 +782,7 @@ function commentifyHandler(e) {
   const currValue = elem.value;
   const [ currStart, currEnd ] = getCursor(elem);
 
-  const rows = getRows(currValue, currStart, currEnd);
+  const { rows, selectedCount, emtpyCount } = getRows(currValue, currStart, currEnd);
   const rowIntents = [];
 
   let isCommented = true;
